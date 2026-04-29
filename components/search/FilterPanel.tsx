@@ -11,7 +11,8 @@ interface Props {
 
 export default function FilterPanel({ type, generation, onType, onGen }: Props) {
   const selectClass =
-    "rounded-md border border-neutral-300 px-3 py-2 text-sm bg-white focus:border-neutral-900 focus:outline-none";
+    "rounded-md border px-3 py-2 text-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400"
+    + " bg-slate-800 text-slate-100 border-slate-600 hover:border-slate-400 transition-colors";
   return (
     <div className="flex gap-2">
       <select

@@ -11,7 +11,7 @@ export default function SearchControls() {
   const [type, setType] = useState("");
   const [generation, setGeneration] = useState("");
 
-  const { visible, loading, error, canLoadMore, loadMore, results } =
+  const { visible, loading, loadingMore, error, canLoadMore, loadMore, candidates } =
     usePokemonSearch({ name, type, generation });
 
   return (
@@ -29,8 +29,9 @@ export default function SearchControls() {
       </div>
       <ResultsGrid
         items={visible}
-        total={results.length}
+        total={candidates.length}
         loading={loading}
+        loadingMore={loadingMore}
         error={error}
         canLoadMore={canLoadMore}
         onLoadMore={loadMore}

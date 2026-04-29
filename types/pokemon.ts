@@ -40,3 +40,48 @@ export interface SearchFilters {
   type: string;
   generation: string;
 }
+
+// ---- Species / Evolution types ----
+
+export interface FlavorTextEntry {
+  flavor_text: string;
+  language: NamedAPIResource;
+  version: NamedAPIResource;
+}
+
+export interface PokemonVariety {
+  is_default: boolean;
+  pokemon: NamedAPIResource;
+}
+
+export interface SpeciesData {
+  id: number;
+  name: string;
+  flavor_text_entries: FlavorTextEntry[];
+  evolution_chain: { url: string };
+  varieties: PokemonVariety[];
+}
+
+export interface EvolutionDetail {
+  min_level: number | null;
+  trigger: NamedAPIResource;
+  item: NamedAPIResource | null;
+}
+
+export interface ChainLink {
+  species: NamedAPIResource;
+  evolution_details: EvolutionDetail[];
+  evolves_to: ChainLink[];
+}
+
+export interface EvolutionChainResponse {
+  chain: ChainLink;
+}
+
+export interface EvolutionStep {
+  name: string;
+  id: number;
+  sprite: string;
+  minLevel: number | null;
+}
+
