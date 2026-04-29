@@ -66,12 +66,18 @@ export function usePokemonDetail(pokemonId: number | null) {
         const species = await getPokemonSpecies(pokemonId);
 
         // English flavor text – clean up escape characters from the API
-        const descEntry = species.flavor_text_entries.find(
+        // Language logic: Spanish first, then English
+        const spanishEntry = species.flavor_text_entries.find(
+          (e) => e.language.name === "es"
+        );
+        const englishEntry = species.flavor_text_entries.find(
           (e) => e.language.name === "en"
         );
+
+        const descEntry = spanishEntry || englishEntry;
         const description = descEntry
           ? descEntry.flavor_text.replace(/[\n\f\r]/g, " ")
-          : "No description available.";
+          : "No hay información sobre este Pokemon";
 
         // Evolution chain
         const chainRes = await getEvolutionChain(species.evolution_chain.url);

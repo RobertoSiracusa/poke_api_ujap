@@ -61,135 +61,176 @@ export default function PokedexModal({ pokemon, onClose }: Props) {
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: "rgba(5, 15, 40, 0.85)", backdropFilter: "blur(6px)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+      style={{ backgroundColor: "rgba(0, 0, 0, 0.7)", backdropFilter: "blur(4px)" }}
     >
       {/* ---- Pokédex Shell ---- */}
       <div
-        className="relative w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl"
-        style={{ background: "#1a1a2e", border: "4px solid #cc0000" }}
+        className="relative w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col"
+        style={{ 
+          backgroundColor: themeColor, 
+          border: "4px solid rgba(0,0,0,0.8)",
+          boxShadow: "inset -8px -8px 0px rgba(0,0,0,0.1), 0 25px 50px -12px rgba(0,0,0,0.5)"
+        }}
       >
-        {/* Top red body with camera & lights */}
-        <div
-          className="relative flex flex-col items-center pt-6 pb-10 px-6"
-          style={{ background: `linear-gradient(160deg, ${themeColor} 0%, ${themeColor}99 100%)` }}
-        >
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute top-3 right-4 text-white/80 hover:text-white text-xl font-bold leading-none cursor-pointer"
-            aria-label="Close"
-          >
-            ✕
-          </button>
-
-          {/* Pokédex number & name */}
-          <p className="mt-6 text-xs font-mono text-white/70">{dexNumber}</p>
-          <h2 className="text-2xl font-extrabold capitalize text-white tracking-wide drop-shadow">
-            {pokemon.name}
-          </h2>
-
-          {/* Type badges */}
-          <div className="flex gap-2 mt-1">
-            {pokemon.types.map((t) => (
-              <span
-                key={t.type.name}
-                className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full"
-                style={{ background: "rgba(0,0,0,0.25)", color: "white", letterSpacing: "0.08em" }}
-              >
-                {t.type.name}
-              </span>
-            ))}
+        {/* Header Area with Lens and Curve */}
+        <div className="relative h-24 w-full px-6 pt-4 shrink-0">
+          {/* Big Blue Lens */}
+          <div className="absolute top-4 left-6 z-10 w-16 h-16 rounded-full bg-white border-[3px] border-black flex items-center justify-center shadow-lg">
+            <div 
+              className="w-13 h-13 rounded-full border-2 border-black"
+              style={{ 
+                background: "radial-gradient(circle at 30% 30%, #5de0ff 0%, #0089b3 100%)",
+                boxShadow: "inset -4px -4px 8px rgba(0,0,0,0.3)"
+              }}
+            >
+              <div className="absolute top-3 left-4 w-4 h-2 bg-white/40 rounded-full rotate-[-45deg]" />
+            </div>
           </div>
 
-          {/* Pokemon image */}
-          <div
-            className="mt-3 w-36 h-36 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(255,255,255,0.15)", border: "3px solid rgba(255,255,255,0.3)" }}
-          >
-            {sprite && (
-              <Image src={sprite} alt={pokemon.name} width={120} height={120} unoptimized className="drop-shadow-lg" />
-            )}
+          {/* Top Curve Silhouette */}
+          <div 
+            className="absolute top-0 right-0 w-full h-full bg-black/10" 
+            style={{ 
+              clipPath: "polygon(0 0, 100% 0, 100% 50%, 65% 50%, 45% 100%, 0 100%)",
+              opacity: 0.5 
+            }} 
+          />
+          
+          <div className="absolute top-6 right-16 flex flex-col items-end">
+            <span className="text-[10px] font-black tracking-widest text-black/60 uppercase leading-none">
+              Pokédex of
+            </span>
+            <span className="text-[10px] font-black tracking-widest text-black/60 uppercase leading-tight">
+              Anomalies
+            </span>
           </div>
 
-          {/* Decorative bottom divider */}
-          <div className="absolute bottom-0 left-0 right-0 h-3 rounded-t-none" style={{ background: "#1a1a2e" }} />
+          {/* Small Pokeball Icon */}
+          <div className="absolute top-6 right-6 w-8 h-8 rounded-full border-2 border-black overflow-hidden bg-white shadow-md">
+             <div className="h-1/2 w-full bg-red-500 border-b-2 border-black" />
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white border-2 border-black z-10" />
+          </div>
         </div>
 
-        {/* ---- Body (dark panel) ---- */}
-        <div className="px-5 pt-5 pb-6 space-y-5" style={{ background: "#1a1a2e", color: "#e2e8f0" }}>
-
-          {/* Description */}
-          <div>
-            <h3 className="text-[10px] uppercase tracking-widest font-bold mb-1" style={{ color: themeColor }}>
-              Pokédex Entry
-            </h3>
-            {loading && (
-              <p className="text-xs text-slate-400 animate-pulse">Loading data…</p>
-            )}
-            {error && (
-              <p className="text-xs text-red-400">Could not load data.</p>
-            )}
-            {data && (
-              <p className="text-sm leading-relaxed text-slate-300">{data.description}</p>
-            )}
-          </div>
-
-          {/* Evolutions / Variants */}
-          {data && (
-            <div>
-              <h3 className="text-[10px] uppercase tracking-widest font-bold mb-3" style={{ color: themeColor }}>
-                {data.hasEvolutions ? "Evolution Line" : "Regional Forms"}
-              </h3>
-
-              {/* Evolution chain */}
-              {data.hasEvolutions && (
-                <div className="flex items-center justify-center flex-wrap gap-1">
-                  {data.evolutions.map((step, i) => (
-                    <div key={step.id} className="flex items-center gap-1">
-                      <EvoBadge step={step} />
-                      {i < data.evolutions.length - 1 && (
-                        <span className="text-white/40 text-xl px-1">›</span>
-                      )}
-                    </div>
+        {/* Inner Screen Area */}
+        <div className="px-6 pb-8 pt-2">
+          <div 
+            className="rounded-xl border-[4px] border-black overflow-hidden shadow-inner flex flex-col"
+            style={{ backgroundColor: "#f0f0f0" }}
+          >
+            {/* Top Display (Sprite and Basic Info) */}
+            <div className="p-4 flex flex-col items-center bg-white border-b-2 border-black/10">
+              <div className="flex justify-between w-full mb-1">
+                <span className="text-[10px] font-mono font-bold text-black/40">{dexNumber}</span>
+                <div className="flex gap-1">
+                  {pokemon.types.map(t => (
+                    <span key={t.type.name} className="text-[8px] font-bold uppercase px-2 py-0.5 rounded bg-black/5 text-black/60">
+                      {t.type.name}
+                    </span>
                   ))}
                 </div>
-              )}
+              </div>
+              
+              <h2 className="text-xl font-black uppercase text-black mb-3 tracking-tighter">
+                {pokemon.name}
+              </h2>
 
-              {/* Regional variants */}
-              {!data.hasEvolutions && data.regionalVariants.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-4">
-                  {data.regionalVariants.map((v) => (
-                    <div key={v.name} className="flex flex-col items-center gap-1">
-                      <div className="w-16 h-16 rounded-full bg-white/20 border border-white/30 flex items-center justify-center">
-                        <Image src={v.sprite} alt={v.name} width={52} height={52} unoptimized className="drop-shadow" />
-                      </div>
-                      <span className="text-xs text-white/80 font-semibold">{v.label} Form</span>
+              <div className="relative w-40 h-40 flex items-center justify-center bg-black/5 rounded-lg border border-black/5">
+                {sprite && (
+                  <Image src={sprite} alt={pokemon.name} width={140} height={140} unoptimized className="drop-shadow-md z-10" />
+                )}
+                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(#000 1px, transparent 0)", backgroundSize: "10px 10px" }} />
+              </div>
+            </div>
+
+            {/* Bottom Display (Description and Evolutions) */}
+            <div className="p-4 flex-1 overflow-y-auto max-h-[220px] custom-scrollbar">
+              <div className="mb-4">
+                <h3 className="text-[9px] font-black uppercase text-black/40 mb-1">Entrada de la Pokédex</h3>
+                {loading ? (
+                  <div className="space-y-1">
+                    <div className="h-3 bg-black/5 animate-pulse rounded" />
+                    <div className="h-3 bg-black/5 animate-pulse rounded w-2/3" />
+                  </div>
+                ) : error ? (
+                  <p className="text-xs text-red-500">Error al cargar datos.</p>
+                ) : (
+                  <p className="text-xs leading-relaxed text-black/80 font-medium italic">
+                    "{data?.description}"
+                  </p>
+                )}
+              </div>
+
+              {data && (
+                <div className="pt-3 border-t border-black/5">
+                  <h3 className="text-[9px] font-black uppercase text-black/40 mb-3">
+                    {data.hasEvolutions ? "Línea Evolutiva" : "Formas Regionales"}
+                  </h3>
+
+                  {data.hasEvolutions ? (
+                    <div className="flex items-center justify-center flex-wrap gap-2">
+                      {data.evolutions.map((step, i) => (
+                        <div key={step.id} className="flex items-center gap-1">
+                           <div className="w-12 h-12 rounded-lg bg-black/5 border border-black/10 flex items-center justify-center group hover:bg-black/10 transition-colors">
+                              <Image src={step.sprite} alt={step.name} width={40} height={40} unoptimized className="drop-shadow-sm" />
+                           </div>
+                           {i < data.evolutions.length - 1 && (
+                             <span className="text-black/20 text-lg">›</span>
+                           )}
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  ) : data.regionalVariants.length > 0 ? (
+                    <div className="flex flex-wrap justify-center gap-4">
+                      {data.regionalVariants.map((v) => (
+                        <div key={v.name} className="flex flex-col items-center">
+                          <div className="w-12 h-12 rounded-lg bg-black/5 border border-black/10 flex items-center justify-center">
+                            <Image src={v.sprite} alt={v.name} width={40} height={40} unoptimized />
+                          </div>
+                          <span className="text-[9px] text-black/60 font-bold mt-1">{v.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-black/40 italic">Sin formas especiales.</p>
+                  )}
                 </div>
-              )}
-
-              {/* Neither */}
-              {!data.hasEvolutions && data.regionalVariants.length === 0 && (
-                <p className="text-sm text-slate-400 italic">
-                  This Pokémon has no evolutions or regional forms.
-                </p>
               )}
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Bottom decorative strip */}
-        <div
-          className="h-4 flex items-center justify-center gap-3"
-          style={{ background: "#cc0000" }}
-        >
-          <div className="w-2 h-2 rounded-full bg-white/50" />
-          <div className="w-2 h-2 rounded-full bg-white/50" />
-          <div className="w-2 h-2 rounded-full bg-white/50" />
+        {/* Bottom red bezel details */}
+        <div className="px-10 pb-6 flex justify-between items-center">
+          <div className="flex gap-2">
+             <div className="w-10 h-2 rounded-full bg-black/20 shadow-inner" />
+             <div className="w-10 h-2 rounded-full bg-black/20 shadow-inner" />
+          </div>
+          <button 
+            onClick={onClose}
+            className="w-10 h-10 rounded-full bg-black/10 border-2 border-black/20 flex items-center justify-center hover:bg-black/20 transition-colors cursor-pointer"
+          >
+            <div className="w-6 h-6 rounded-full bg-red-600/20 shadow-inner flex items-center justify-center">
+               <div className="w-2 h-2 rounded-full bg-red-600 shadow-sm" />
+            </div>
+          </button>
         </div>
       </div>
+
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(0,0,0,0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(0,0,0,0.2);
+          border-radius: 10px;
+        }
+      `}</style>
     </div>
   );
 }
+
