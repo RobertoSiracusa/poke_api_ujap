@@ -4,11 +4,13 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { usePokemonDetail } from "@/hooks/usePokemonDetail";
 import { TYPE_COLORS } from "@/lib/constants";
+import { getFormInfo } from "@/lib/formInfo";
 import type { PokemonDetail, EvolutionStep } from "@/types/pokemon";
 
 interface Props {
   pokemon: PokemonDetail;
   onClose: () => void;
+  onSelectPokemon?: (p: PokemonDetail) => void;
 }
 
 function EvoBadge({ step }: { step: EvolutionStep }) {
@@ -32,7 +34,24 @@ function EvoBadge({ step }: { step: EvolutionStep }) {
   );
 }
 
-export default function PokedexModal({ pokemon, onClose }: Props) {
+// Badge background per form label keyword (same palette as PokemonCard)
+function modalBadgeStyle(label: string): React.CSSProperties {
+  if (label.includes("Mega"))       return { background: "rgba(180,0,220,0.15)", color: "#9b00d4", border: "1px solid rgba(180,0,220,0.4)" };
+  if (label.includes("Gigantamax")) return { background: "rgba(220,30,60,0.15)",  color: "#b30025", border: "1px solid rgba(220,30,60,0.4)" };
+  if (label.includes("Eternamax"))  return { background: "rgba(220,30,60,0.15)",  color: "#b30025", border: "1px solid rgba(220,30,60,0.4)" };
+  if (label.includes("Primigenia")) return { background: "rgba(200,100,0,0.15)",  color: "#8a4400", border: "1px solid rgba(200,100,0,0.4)" };
+  if (label.includes("Origen"))     return { background: "rgba(60,80,200,0.15)",  color: "#2030a0", border: "1px solid rgba(60,80,200,0.4)" };
+  if (label.includes("Alola"))      return { background: "rgba(255,165,0,0.15)",  color: "#a06000", border: "1px solid rgba(255,165,0,0.4)" };
+  if (label.includes("Galar"))      return { background: "rgba(120,0,180,0.15)",  color: "#600090", border: "1px solid rgba(120,0,180,0.4)" };
+  if (label.includes("Hisui"))      return { background: "rgba(80,140,60,0.15)",  color: "#2e6020", border: "1px solid rgba(80,140,60,0.4)" };
+  if (label.includes("Paldea"))     return { background: "rgba(210,60,60,0.15)",  color: "#8b0000", border: "1px solid rgba(210,60,60,0.4)" };
+  if (label.includes("Paradoja (Pasado)")) return { background: "rgba(180,40,60,0.15)", color: "#b3243a", border: "1px solid rgba(180,40,60,0.4)" };
+  if (label.includes("Paradoja (Futuro)")) return { background: "rgba(60,40,160,0.15)", color: "#3a24b3", border: "1px solid rgba(60,40,160,0.4)" };
+  if (label.includes("Paradoja"))   return { background: "rgba(30,30,30,0.10)",   color: "#333",    border: "1px solid rgba(30,30,30,0.3)" };
+  return { background: "rgba(0,0,0,0.08)", color: "#333", border: "1px solid rgba(0,0,0,0.2)" };
+}
+
+export default function PokedexModal({ pokemon, onClose, onSelectPokemon }: Props) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const { data, loading, error } = usePokemonDetail(pokemon.id);
 
@@ -42,6 +61,7 @@ export default function PokedexModal({ pokemon, onClose }: Props) {
     pokemon.sprites.other?.["official-artwork"]?.front_default ??
     pokemon.sprites.front_default ??
     "";
+  const formInfo = getFormInfo(pokemon.name);
 
   // Close on backdrop click
   const handleOverlayClick = (e: React.MouseEvent) => {
@@ -122,19 +142,43 @@ export default function PokedexModal({ pokemon, onClose }: Props) {
             {/* Top Display (Sprite and Basic Info) */}
             <div className="p-4 flex flex-col items-center bg-white border-b-2 border-black/10">
               <div className="flex justify-between w-full mb-1">
-                <span className="text-[10px] font-mono font-bold text-black/40">{dexNumber}</span>
+                <span className="text-[10px] font-mono font-bold text-black/40">
+                  {formInfo ? "" : dexNumber}
+                </span>
                 <div className="flex gap-1">
                   {pokemon.types.map(t => (
-                    <span key={t.type.name} className="text-[8px] font-bold uppercase px-2 py-0.5 rounded bg-black/5 text-black/60">
-                      {t.type.name}
-                    </span>
+                    <div key={t.type.name} className="relative w-12 h-4" title={t.type.name}>
+                      <span className="sr-only">{t.type.name}</span>
+                      <Image
+                        src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/types/generation-viii/sword-shield/${t.type.url.split("/").slice(-2, -1)[0]}.png`}
+                        alt={t.type.name}
+                        fill
+                        className="object-contain drop-shadow-sm"
+                        unoptimized
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
               
-              <h2 className="text-xl font-black uppercase text-black mb-3 tracking-tighter">
+              <h2 className="text-xl font-black uppercase text-black mb-1 tracking-tighter">
                 {pokemon.name}
               </h2>
+
+              {/* Form info badge — only for special forms */}
+              {formInfo && (
+                <div className="flex flex-col items-center gap-0.5 mb-2">
+                  <span
+                    className="text-[9px] font-bold px-2.5 py-0.5 rounded-full leading-tight"
+                    style={modalBadgeStyle(formInfo.formLabel)}
+                  >
+                    {formInfo.formLabel}
+                  </span>
+                  <span className="text-[10px] text-black/50 font-medium">
+                    Forma de <span className="font-bold text-black/70">{formInfo.baseName}</span>
+                  </span>
+                </div>
+              )}
 
               <div className="relative w-40 h-40 flex items-center justify-center bg-black/5 rounded-lg border border-black/5">
                 {sprite && (
@@ -156,44 +200,58 @@ export default function PokedexModal({ pokemon, onClose }: Props) {
                 ) : error ? (
                   <p className="text-xs text-red-500">Error al cargar datos.</p>
                 ) : (
-                  <p className="text-xs leading-relaxed text-black/80 font-medium italic">
-                    "{data?.description}"
+                  <p className="text-xs leading-relaxed text-black/80 font-medium italic min-h-[1rem]">
+                    {data?.description ? `"${data.description}"` : ""}
                   </p>
                 )}
               </div>
 
               {data && (
-                <div className="pt-3 border-t border-black/5">
-                  <h3 className="text-[9px] font-black uppercase text-black/40 mb-3">
-                    {data.hasEvolutions ? "Línea Evolutiva" : "Formas Regionales"}
-                  </h3>
-
-                  {data.hasEvolutions ? (
-                    <div className="flex items-center justify-center flex-wrap gap-2">
-                      {data.evolutions.map((step, i) => (
-                        <div key={step.id} className="flex items-center gap-1">
-                           <div className="w-12 h-12 rounded-lg bg-black/5 border border-black/10 flex items-center justify-center group hover:bg-black/10 transition-colors">
-                              <Image src={step.sprite} alt={step.name} width={40} height={40} unoptimized className="drop-shadow-sm" />
-                           </div>
-                           {i < data.evolutions.length - 1 && (
-                             <span className="text-black/20 text-lg">›</span>
-                           )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : data.regionalVariants.length > 0 ? (
-                    <div className="flex flex-wrap justify-center gap-4">
-                      {data.regionalVariants.map((v) => (
-                        <div key={v.name} className="flex flex-col items-center">
-                          <div className="w-12 h-12 rounded-lg bg-black/5 border border-black/10 flex items-center justify-center">
-                            <Image src={v.sprite} alt={v.name} width={40} height={40} unoptimized />
+                <div className="pt-3 border-t border-black/5 flex flex-col gap-4">
+                  {data.hasEvolutions && (
+                    <div>
+                      <h3 className="text-[9px] font-black uppercase text-black/40 mb-3">Línea Evolutiva</h3>
+                      <div className="flex items-center justify-center flex-wrap gap-2">
+                        {data.evolutions.map((step, i) => (
+                          <div key={step.id} className="flex items-center gap-1">
+                             <div className="w-12 h-12 rounded-lg bg-black/5 border border-black/10 flex items-center justify-center group hover:bg-black/10 transition-colors">
+                                <Image src={step.sprite} alt={step.name} width={40} height={40} unoptimized className="drop-shadow-sm" />
+                             </div>
+                             {i < data.evolutions.length - 1 && (
+                               <span className="text-black/20 text-lg">›</span>
+                             )}
                           </div>
-                          <span className="text-[9px] text-black/60 font-bold mt-1">{v.label}</span>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
-                  ) : (
-                    <p className="text-[10px] text-black/40 italic">Sin formas especiales.</p>
+                  )}
+
+                  {data.regionalVariants.length > 0 && (
+                    <div>
+                      <h3 className="text-[9px] font-black uppercase text-black/40 mb-3">Formas Regionales</h3>
+                      <div className="flex flex-wrap justify-center gap-4">
+                        {data.regionalVariants.map((v) => (
+                          <div 
+                            key={v.name} 
+                            className={`flex flex-col items-center ${onSelectPokemon && v.detail ? 'cursor-pointer hover:scale-105 transition-transform' : ''}`}
+                            onClick={() => {
+                              if (onSelectPokemon && v.detail) {
+                                onSelectPokemon(v.detail);
+                              }
+                            }}
+                          >
+                            <div className="w-12 h-12 rounded-lg bg-black/5 border border-black/10 flex items-center justify-center">
+                              <Image src={v.sprite} alt={v.name} width={40} height={40} unoptimized />
+                            </div>
+                            <span className="text-[9px] text-black/60 font-bold mt-1">{v.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {!data.hasEvolutions && data.regionalVariants.length === 0 && (
+                    <p className="text-[10px] text-black/40 italic">Sin formas especiales ni evoluciones.</p>
                   )}
                 </div>
               )}

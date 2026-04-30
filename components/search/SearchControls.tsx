@@ -10,9 +10,10 @@ export default function SearchControls() {
   const [name, setName] = useState("");
   const [type, setType] = useState("");
   const [generation, setGeneration] = useState("");
+  const [form, setForm] = useState("");
 
   const { visible, loading, loadingMore, error, canLoadMore, loadMore, candidates } =
-    usePokemonSearch({ name, type, generation });
+    usePokemonSearch({ name, type, generation, form });
 
   return (
     <section className="mx-auto max-w-5xl px-4 py-6 space-y-4">
@@ -23,8 +24,10 @@ export default function SearchControls() {
         <FilterPanel
           type={type}
           generation={generation}
+          form={form}
           onType={setType}
           onGen={setGeneration}
+          onForm={setForm}
         />
       </div>
       <ResultsGrid

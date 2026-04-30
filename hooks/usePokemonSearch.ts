@@ -2,7 +2,7 @@ import { useEffect, useMemo, useReducer, useCallback } from "react";
 import { getAllPokemonNames, getPokemonByName } from "@/services/pokeapi/pokemon";
 import { getPokemonNamesByType } from "@/services/pokeapi/type";
 import { getPokemonNamesByGeneration } from "@/services/pokeapi/generation";
-import { intersectNames, applyNameSubstring } from "@/lib/filters";
+import { intersectNames, applyNameSubstring, applyFormFilter } from "@/lib/filters";
 import { PAGE_SIZE } from "@/lib/constants";
 import type { PokemonDetail, SearchFilters } from "@/types/pokemon";
 
@@ -14,8 +14,8 @@ type Action =
   | { type: "APPEND_RESULTS"; payload: PokemonDetail[] };
 
 interface State {
-  candidates: string[]; // All names matching filters
-  results: PokemonDetail[]; // Details fetched so far
+  candidates: string[];
+  results: PokemonDetail[];
   loading: boolean;
   loadingMore: boolean;
   error: string | null;
@@ -59,8 +59,8 @@ export function usePokemonSearch(filters: SearchFilters) {
   const [state, dispatch] = useReducer(reducer, initial);
 
   const key = useMemo(
-    () => `${filters.name}|${filters.type}|${filters.generation}`,
-    [filters.name, filters.type, filters.generation]
+    () => `${filters.name}|${filters.type}|${filters.generation}|${filters.form}`,
+    [filters.name, filters.type, filters.generation, filters.form]
   );
 
   useEffect(() => {
@@ -82,6 +82,10 @@ export function usePokemonSearch(filters: SearchFilters) {
         let candidates = intersectNames(allNames, typeNames, genNames);
         if (candidates === null) candidates = [];
         candidates = applyNameSubstring(candidates, filters.name);
+
+        if (filters.form) {
+          candidates = applyFormFilter(candidates, filters.form);
+        }
 
         // Fetch first batch
         const firstSlice = candidates.slice(0, PAGE_SIZE);

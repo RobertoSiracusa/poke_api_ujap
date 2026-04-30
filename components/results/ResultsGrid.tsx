@@ -35,7 +35,7 @@ export default function ResultsGrid({
   return (
     <>
       <p className="text-xs text-slate-400 mb-2">
-        Showing {items.length} of {total} match{total === 1 ? "" : "es"}
+        Mostrando {items.length} de {total} resultado{total === 1 ? "" : "s"}
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
         {items.map((p) => (
@@ -48,11 +48,15 @@ export default function ResultsGrid({
           disabled={loadingMore}
           className="mx-auto block mt-6 rounded-md border border-slate-500 px-6 py-2 text-sm text-slate-300 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
         >
-          {loadingMore ? "Loading more..." : "Load more"}
+          {loadingMore ? "Cargando más..." : "Cargar más"}
         </button>
       )}
       {selected && (
-        <PokedexModal pokemon={selected} onClose={() => setSelected(null)} />
+        <PokedexModal 
+          pokemon={selected} 
+          onClose={() => setSelected(null)} 
+          onSelectPokemon={setSelected}
+        />
       )}
     </>
   );

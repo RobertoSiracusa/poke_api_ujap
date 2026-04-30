@@ -39,6 +39,7 @@ export interface SearchFilters {
   name: string;
   type: string;
   generation: string;
+  form?: string;
 }
 
 // ---- Species / Evolution types ----

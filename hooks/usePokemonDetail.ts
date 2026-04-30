@@ -27,21 +27,37 @@ function flattenChain(link: ChainLink, steps: EvolutionStep[] = []): EvolutionSt
   return steps;
 }
 
-// Get regional variant names (alola / hisui) from species varieties
+// Get regional variant names from species varieties (including the base form)
 function getRegionalVariants(species: SpeciesData): { name: string; label: string }[] {
-  return species.varieties
-    .filter((v) => !v.is_default)
-    .filter((v) => v.pokemon.name.includes("-alola") || v.pokemon.name.includes("-hisui"))
-    .map((v) => ({
-      name: v.pokemon.name,
-      label: v.pokemon.name.includes("-alola") ? "Alola" : "Hisui",
-    }));
+  const forms = species.varieties
+    .filter((v) => 
+      v.is_default || 
+      v.pokemon.name.includes("-alola") || 
+      v.pokemon.name.includes("-galar") || 
+      v.pokemon.name.includes("-hisui") || 
+      v.pokemon.name.includes("-paldea")
+    )
+    .map((v) => {
+      let label = "Normal";
+      if (v.pokemon.name.includes("-alola")) label = "Alola";
+      else if (v.pokemon.name.includes("-galar")) label = "Galar";
+      else if (v.pokemon.name.includes("-hisui")) label = "Hisui";
+      else if (v.pokemon.name.includes("-paldea")) label = "Paldea";
+      
+      return {
+        name: v.pokemon.name,
+        label,
+      };
+    });
+  
+  // Only return if there's actually a regional variant alongside the normal one
+  return forms.length > 1 ? forms : [];
 }
 
 export interface PokemonDetailData {
   description: string;
   evolutions: EvolutionStep[];  // entire chain; first item is the base
-  regionalVariants: { name: string; label: string; id: number; sprite: string }[];
+  regionalVariants: { name: string; label: string; id: number; sprite: string; detail: any }[];
   hasEvolutions: boolean;
 }
 
@@ -77,35 +93,38 @@ export function usePokemonDetail(pokemonId: number | null) {
         const descEntry = spanishEntry || englishEntry;
         const description = descEntry
           ? descEntry.flavor_text.replace(/[\n\f\r]/g, " ")
-          : "No hay información sobre este Pokemon";
+          : "";
 
         // Evolution chain
         const chainRes = await getEvolutionChain(species.evolution_chain.url);
         const evolutions = flattenChain(chainRes.chain);
         const hasEvolutions = evolutions.length > 1;
 
-        // Regional variants (only if no evolutions)
-        let regionalVariants: PokemonDetailData["regionalVariants"] = [];
-        if (!hasEvolutions) {
-          const rawVariants = getRegionalVariants(species);
-          regionalVariants = await Promise.all(
-            rawVariants.map(async (v) => {
-              try {
-                const poke = await getPokemonByName(v.name);
-                return { ...v, id: poke.id, sprite: poke.sprites.other?.["official-artwork"]?.front_default ?? poke.sprites.front_default ?? "" };
-              } catch {
-                const id = idFromUrl(
-                  species.varieties.find((sv) => sv.pokemon.name === v.name)?.pokemon.url ?? ""
-                );
-                return {
-                  ...v,
-                  id,
-                  sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
-                };
-              }
-            })
-          );
-        }
+        // Regional variants (always fetch if there are any)
+        const rawVariants = getRegionalVariants(species);
+        const regionalVariants = await Promise.all(
+          rawVariants.map(async (v) => {
+            try {
+              const poke = await getPokemonByName(v.name);
+              return { 
+                ...v, 
+                id: poke.id, 
+                sprite: poke.sprites.other?.["official-artwork"]?.front_default ?? poke.sprites.front_default ?? "",
+                detail: poke 
+              };
+            } catch {
+              const id = idFromUrl(
+                species.varieties.find((sv) => sv.pokemon.name === v.name)?.pokemon.url ?? ""
+              );
+              return {
+                ...v,
+                id,
+                sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
+                detail: null
+              };
+            }
+          })
+        );
 
         if (!cancelled) {
           setData({ description, evolutions, hasEvolutions, regionalVariants });
