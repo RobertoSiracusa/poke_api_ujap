@@ -15,3 +15,23 @@ export function applyNameSubstring(names: string[], query: string): string[] {
   if (!q) return names;
   return names.filter((n) => n.includes(q));
 }
+
+import { getFormInfo } from "./formInfo";
+
+export function applyFormFilter(names: string[], formId: string): string[] {
+  if (!formId) return names;
+
+  return names.filter((n) => {
+    const info = getFormInfo(n);
+    if (formId === "normal") {
+      return info === null;
+    }
+    if (formId === "Paradoja") {
+      return info && info.formLabel.includes("Paradoja");
+    }
+    if (formId === "Mega Evolución") {
+      return info && info.formLabel.includes("Mega Evolución");
+    }
+    return info && info.formLabel === formId;
+  });
+}

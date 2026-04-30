@@ -1,41 +1,57 @@
-import { useEffect, useMemo, useReducer } from "react";
+import { useEffect, useMemo, useReducer, useCallback } from "react";
 import { getAllPokemonNames, getPokemonByName } from "@/services/pokeapi/pokemon";
 import { getPokemonNamesByType } from "@/services/pokeapi/type";
 import { getPokemonNamesByGeneration } from "@/services/pokeapi/generation";
-import { intersectNames, applyNameSubstring } from "@/lib/filters";
+import { intersectNames, applyNameSubstring, applyFormFilter } from "@/lib/filters";
 import { PAGE_SIZE } from "@/lib/constants";
 import type { PokemonDetail, SearchFilters } from "@/types/pokemon";
 
 type Action =
   | { type: "SET_LOADING" }
-  | { type: "SET_RESULTS"; payload: PokemonDetail[] }
+  | { type: "SET_INITIAL_RESULTS"; candidates: string[]; results: PokemonDetail[] }
   | { type: "SET_ERROR"; payload: string }
-  | { type: "LOAD_MORE" };
+  | { type: "SET_LOADING_MORE" }
+  | { type: "APPEND_RESULTS"; payload: PokemonDetail[] };
 
 interface State {
+  candidates: string[];
   results: PokemonDetail[];
   loading: boolean;
+  loadingMore: boolean;
   error: string | null;
-  visibleCount: number;
 }
 
 const initial: State = {
+  candidates: [],
   results: [],
   loading: false,
+  loadingMore: false,
   error: null,
-  visibleCount: PAGE_SIZE,
 };
 
 function reducer(s: State, a: Action): State {
   switch (a.type) {
     case "SET_LOADING":
-      return { ...s, loading: true, error: null, visibleCount: PAGE_SIZE };
-    case "SET_RESULTS":
-      return { ...s, loading: false, results: a.payload };
+      return { ...initial, loading: true };
+    case "SET_INITIAL_RESULTS":
+      return {
+        ...s,
+        loading: false,
+        candidates: a.candidates,
+        results: a.results,
+      };
     case "SET_ERROR":
-      return { ...s, loading: false, error: a.payload };
-    case "LOAD_MORE":
-      return { ...s, visibleCount: s.visibleCount + PAGE_SIZE };
+      return { ...s, loading: false, loadingMore: false, error: a.payload };
+    case "SET_LOADING_MORE":
+      return { ...s, loadingMore: true };
+    case "APPEND_RESULTS":
+      return {
+        ...s,
+        loadingMore: false,
+        results: [...s.results, ...a.payload],
+      };
+    default:
+      return s;
   }
 }
 
@@ -43,29 +59,18 @@ export function usePokemonSearch(filters: SearchFilters) {
   const [state, dispatch] = useReducer(reducer, initial);
 
   const key = useMemo(
-    () => `${filters.name}|${filters.type}|${filters.generation}`,
-    [filters.name, filters.type, filters.generation]
+    () => `${filters.name}|${filters.type}|${filters.generation}|${filters.form}`,
+    [filters.name, filters.type, filters.generation, filters.form]
   );
 
   useEffect(() => {
-    const hasAnyFilter =
-      filters.name.trim() || filters.type || filters.generation;
-
-    if (!hasAnyFilter) {
-      dispatch({ type: "SET_RESULTS", payload: [] });
-      return;
-    }
-
     let cancelled = false;
     dispatch({ type: "SET_LOADING" });
 
     (async () => {
       try {
         const [allNames, typeNames, genNames] = await Promise.all([
-          // Only fetch full name list for name-only searches
-          filters.name.trim() && !filters.type && !filters.generation
-            ? getAllPokemonNames()
-            : Promise.resolve(undefined),
+          getAllPokemonNames(),
           filters.type
             ? getPokemonNamesByType(filters.type)
             : Promise.resolve(undefined),
@@ -78,13 +83,24 @@ export function usePokemonSearch(filters: SearchFilters) {
         if (candidates === null) candidates = [];
         candidates = applyNameSubstring(candidates, filters.name);
 
-        const slice = candidates.slice(0, 200);
+        if (filters.form) {
+          candidates = applyFormFilter(candidates, filters.form);
+        }
+
+        // Fetch first batch
+        const firstSlice = candidates.slice(0, PAGE_SIZE);
         const details = await Promise.all(
-          slice.map((n) => getPokemonByName(n).catch(() => null))
+          firstSlice.map((n) => getPokemonByName(n).catch(() => null))
         );
         const clean = details.filter((d): d is PokemonDetail => d !== null);
 
-        if (!cancelled) dispatch({ type: "SET_RESULTS", payload: clean });
+        if (!cancelled) {
+          dispatch({
+            type: "SET_INITIAL_RESULTS",
+            candidates,
+            results: clean,
+          });
+        }
       } catch (e) {
         if (!cancelled)
           dispatch({ type: "SET_ERROR", payload: (e as Error).message });
@@ -94,12 +110,35 @@ export function usePokemonSearch(filters: SearchFilters) {
     return () => {
       cancelled = true;
     };
-  }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [key]);
+
+  const loadMore = useCallback(async () => {
+    if (state.loading || state.loadingMore) return;
+    if (state.results.length >= state.candidates.length) return;
+
+    dispatch({ type: "SET_LOADING_MORE" });
+
+    try {
+      const nextSlice = state.candidates.slice(
+        state.results.length,
+        state.results.length + PAGE_SIZE
+      );
+      const details = await Promise.all(
+        nextSlice.map((n) => getPokemonByName(n).catch(() => null))
+      );
+      const clean = details.filter((d): d is PokemonDetail => d !== null);
+
+      dispatch({ type: "APPEND_RESULTS", payload: clean });
+    } catch (e) {
+      dispatch({ type: "SET_ERROR", payload: (e as Error).message });
+    }
+  }, [state.loading, state.loadingMore, state.results.length, state.candidates]);
 
   return {
     ...state,
-    visible: state.results.slice(0, state.visibleCount),
-    canLoadMore: state.visibleCount < state.results.length,
-    loadMore: () => dispatch({ type: "LOAD_MORE" }),
+    visible: state.results, // Results are already paginated
+    canLoadMore: state.results.length < state.candidates.length,
+    loadMore,
   };
 }
+
