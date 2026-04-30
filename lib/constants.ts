@@ -5,24 +5,24 @@ export const POKEMON_TYPES = [
 ] as const;
 
 export const TYPE_COLORS: Record<string, string> = {
-  fire:     "#FFAB76",
-  water:    "#76C0FF",
-  grass:    "#86D97A",
+  fire: "#FFAB76",
+  water: "#76C0FF",
+  grass: "#86D97A",
   electric: "#FAE96A",
-  psychic:  "#FA8FB8",
-  ice:      "#A8E8F0",
-  dragon:   "#A07CFF",
-  dark:     "#6B5B4E",
-  fairy:    "#F4A8CF",
-  normal:   "#C2C2A3",
+  psychic: "#FA8FB8",
+  ice: "#A8E8F0",
+  dragon: "#A07CFF",
+  dark: "#6B5B4E",
+  fairy: "#F4A8CF",
+  normal: "#C2C2A3",
   fighting: "#D4786A",
-  flying:   "#AABCF0",
-  poison:   "#C47FCC",
-  ground:   "#E8D08A",
-  rock:     "#C9B86A",
-  bug:      "#C0CC5A",
-  ghost:    "#9A7EC0",
-  steel:    "#C0C8D8",
+  flying: "#AABCF0",
+  poison: "#C47FCC",
+  ground: "#E8D08A",
+  rock: "#C9B86A",
+  bug: "#C0CC5A",
+  ghost: "#9A7EC0",
+  steel: "#C0C8D8",
 };
 
 export const TYPE_ICONS: Record<string, string> = {
@@ -59,7 +59,7 @@ export const GENERATIONS = [
 ] as const;
 
 export const POKEMON_FORMS = [
-  { id: "normal", label: "Normal (Base)" },
+  { id: "normal", label: "Normal" },
   { id: "Mega Evolución", label: "Mega Evolución" },
   { id: "Gigantamax", label: "Gigantamax" },
   { id: "Forma Alola", label: "Forma Alola" },

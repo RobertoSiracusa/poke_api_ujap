@@ -8,20 +8,19 @@ interface Props {
   onClick: (p: PokemonDetail) => void;
 }
 
-// Badge colors per form type keyword
 function formBadgeStyle(label: string): React.CSSProperties {
-  if (label.includes("Mega"))       return { background: "rgba(180,0,220,0.75)", color: "#fff" };
+  if (label.includes("Mega")) return { background: "rgba(180,0,220,0.75)", color: "#fff" };
   if (label.includes("Gigantamax")) return { background: "rgba(220,30,60,0.80)", color: "#fff" };
-  if (label.includes("Eternamax"))  return { background: "rgba(220,30,60,0.80)", color: "#fff" };
+  if (label.includes("Eternamax")) return { background: "rgba(220,30,60,0.80)", color: "#fff" };
   if (label.includes("Primigenia")) return { background: "rgba(200,100,0,0.80)", color: "#fff" };
-  if (label.includes("Origen"))     return { background: "rgba(60,80,200,0.80)", color: "#fff" };
-  if (label.includes("Alola"))      return { background: "rgba(255,165,0,0.80)", color: "#fff" };
-  if (label.includes("Galar"))      return { background: "rgba(120,0,180,0.80)", color: "#fff" };
-  if (label.includes("Hisui"))      return { background: "rgba(80,140,60,0.85)", color: "#fff" };
-  if (label.includes("Paldea"))     return { background: "rgba(210,60,60,0.80)", color: "#fff" };
+  if (label.includes("Origen")) return { background: "rgba(60,80,200,0.80)", color: "#fff" };
+  if (label.includes("Alola")) return { background: "rgba(255,165,0,0.80)", color: "#fff" };
+  if (label.includes("Galar")) return { background: "rgba(120,0,180,0.80)", color: "#fff" };
+  if (label.includes("Hisui")) return { background: "rgba(80,140,60,0.85)", color: "#fff" };
+  if (label.includes("Paldea")) return { background: "rgba(210,60,60,0.80)", color: "#fff" };
   if (label.includes("Paradoja (Pasado)")) return { background: "rgba(180,40,60,0.85)", color: "#ffcccc" };
   if (label.includes("Paradoja (Futuro)")) return { background: "rgba(60,40,160,0.85)", color: "#d9ccff" };
-  if (label.includes("Paradoja"))   return { background: "rgba(30,30,30,0.82)", color: "#e0e0e0" };
+  if (label.includes("Paradoja")) return { background: "rgba(30,30,30,0.82)", color: "#e0e0e0" };
   return { background: "rgba(0,0,0,0.55)", color: "#fff" };
 }
 

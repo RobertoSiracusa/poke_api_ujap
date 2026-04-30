@@ -42,8 +42,6 @@ export interface SearchFilters {
   form?: string;
 }
 
-// ---- Species / Evolution types ----
-
 export interface FlavorTextEntry {
   flavor_text: string;
   language: NamedAPIResource;
