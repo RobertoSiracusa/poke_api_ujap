@@ -87,7 +87,6 @@ export function usePokemonSearch(filters: SearchFilters) {
           candidates = applyFormFilter(candidates, filters.form);
         }
 
-        // Fetch first batch
         const firstSlice = candidates.slice(0, PAGE_SIZE);
         const details = await Promise.all(
           firstSlice.map((n) => getPokemonByName(n).catch(() => null))
@@ -136,7 +135,7 @@ export function usePokemonSearch(filters: SearchFilters) {
 
   return {
     ...state,
-    visible: state.results, // Results are already paginated
+    visible: state.results,
     canLoadMore: state.results.length < state.candidates.length,
     loadMore,
   };
