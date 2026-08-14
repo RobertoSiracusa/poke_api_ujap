@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pokédex Search</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        
+        <div>
+          <p class="brand-tag">Pokédex</p>
+          <h1>Buscador Pokémon</h1>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="search-panel">
+        <h2>Buscar por nombre o ID</h2>
+
+        <form id="search-form" class="search-form" novalidate>
+          <label class="sr-only" for="pokemon-input">Nombre o ID del Pokémon</label>
+          <div class="input-row">
+            <input
+              id="pokemon-input"
+              name="pokemon"
+              type="text"
+              placeholder="Ejemplo: pikachu o 25"
+              autocomplete="off"
+            />
+            <button type="submit">Buscar</button>
+          </div>
+        </form>
+
+        <p class="helper-text">Consulta la API oficial de PokeAPI</p>
+        <div id="status-message" class="status-message" aria-live="polite"></div>
+      </section>
+
+      <section id="pokemon-card" class="pokemon-card hidden" aria-live="polite">
+        <div class="sprite-box">
+          <img id="pokemon-image" src="" alt="Pokémon" />
+        </div>
+
+        <div class="pokemon-info">
+          <div class="title-row">
+            <h2 id="pokemon-name">-</h2>
+            <span id="pokemon-badge" class="pokemon-badge">#000</span>
+          </div>
+
+          <div class="id-grid">
+            <div class="id-box">
+              <span>ID nacional</span>
+              <strong id="national-id">-</strong>
+            </div>
+            <div class="id-box">
+              <span>ID internacional</span>
+              <strong id="international-id">-</strong>
+            </div>
+          </div>
+
+          <div class="types-row">
+            <span class="types-label">Tipo(s):</span>
+            <div id="pokemon-types" class="types-list"></div>
+          </div>
+
+          <div class="stats-panel">
+            <h3>Estadisticas</h3>
+            <ul id="stats-list" class="stats-list"></ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

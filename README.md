@@ -1,88 +1,62 @@
-# PokéSearch
+# Pokédex Search
 
-University assignment — Lenguajes de Programación, UJAP.
+Proyecto recreado con HTML, CSS y JavaScript puro para consultar la API de PokeAPI.
 
-Next.js app that searches Pokémon via [PokeAPI](https://pokeapi.co/). Filter by name, type, generation, and specific forms simultaneously. Features a custom Pokédex modal with evolution chains, regional variants, and full Spanish localization.
+## Stack tecnológico
 
----
+- HTML
+- CSS
+- JavaScript
+- PokeAPI
 
-## Stack
+## Requisitos cumplidos
 
-| Tool | Version |
-|---|---|
-| Next.js (App Router) | 16.x |
-| TypeScript | 5.x |
-| Tailwind CSS | 4.x |
-| PokeAPI | v2 |
+- Búsqueda por nombre o ID
+- Muestra de imagen front_default
+- Nombre del Pokémon
+- ID nacional
+- ID internacional
+- Tipo(s)
+- 6 stats base
+- Manejo de error si no existe
+- Mensaje de "Cargando..." mientras espera
 
----
-
-## Features
-
-- **Advanced Search & Filtering:**
-  - Search by name (substring match) with a quick-clear (✕) button.
-  - Filter by type (18 types) using official Pokémon Type Icons.
-  - Filter by generation (Gen I – IX).
-  - Filter by specific forms (Mega Evolutions, Gigantamax, Regional Variants, Paradox, etc.).
-  - Combine all filters simultaneously.
-- **Detailed Pokédex Modal:**
-  - Displays Spanish Pokédex flavor text.
-  - Full evolution chain display with sprites and level requirements.
-  - Interactive Regional variants navigation (click a variant to view its details).
-  - Dynamic badges with specific color schemes for special forms (e.g., Red/Purple for Paradox forms).
-- **Automated Form Detection:** Automatically parses API names to identify and format forms (Alola, Galar, Hisui, Paldea, Primal, Origin, Wishiwashi-School, etc.) while hiding redundant Pokédex numbers for alternate forms.
-- **UI / UX:** Minimalistic, responsive grid, localized entirely in Spanish.
-
----
-
-## Project Structure
+## Estructura
 
 ```text
-app/                    # Next.js App Router pages
-components/
-  layout/               # Header
-  search/               # SearchBar, FilterPanel, SearchControls
-  results/              # ResultsGrid, PokemonCard, PokedexModal, EmptyState, LoadingState
-hooks/
-  usePokemonSearch.ts   # Search orchestration hook
-  usePokemonDetail.ts   # Fetches species data, evolution chains, and regional variants
-services/pokeapi/       # API layer (client, pokemon, type, generation)
-lib/
-  constants.ts          # Types list, generations list, form lists, type icons
-  filters.ts            # Name intersection, substring logic, form filtering
-  formInfo.ts           # Utility to detect and label alternate Pokémon forms
-types/
-  pokemon.ts            # TypeScript types for PokeAPI responses
+index.html
+styles.css
+script.js
 ```
 
----
+## Cómo ejecutar
 
-## Getting Started
+### Opción 1: con Python
 
 ```bash
-npm install
-npm run dev
+python3 -m http.server 4173
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Luego abre:
 
----
+```text
+http://localhost:4173
+```
 
-## How It Works
+### Opción 2: sin Python
 
-1. User enters name / selects type / selects generation / selects form (any combination).
-2. Hook fetches candidate name lists from PokeAPI in parallel.
-3. Lists are intersected by name; substring filter and form detection filter applied on top.
-4. Detail fetches (sprite + types) run in parallel for up to 200 candidates.
-5. Results render in a responsive grid, 24 at a time, displaying official Type Icons.
-6. Clicking a Pokémon opens the **Pokédex Modal**, which triggers an additional fetch to the `pokemon-species` endpoint to retrieve Spanish descriptions, construct the evolution chain, and find related regional variants.
-
----
-
-## Scripts
+Si tienes Node.js instalado, puedes usar:
 
 ```bash
-npm run dev      # dev server at localhost:3000
-npm run build    # production build
-npm run lint     # ESLint check
+npx serve .
 ```
+
+Y luego abrir:
+
+```text
+http://localhost:3000
+```
+
+## Uso
+
+Escribe el nombre o el número del Pokémon y presiona Buscar. Si el dato no existe, se mostrará un mensaje de error; mientras se consulta la API, aparece el estado de carga.
