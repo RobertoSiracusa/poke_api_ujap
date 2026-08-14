@@ -42,6 +42,27 @@ const statLabels = {
   speed: "Velocidad"
 };
 
+const typeLabels = {
+  normal: "Normal",
+  fire: "Fuego",
+  water: "Agua",
+  electric: "Eléctrico",
+  grass: "Planta",
+  ice: "Hielo",
+  fighting: "Lucha",
+  poison: "Veneno",
+  ground: "Tierra",
+  flying: "Volador",
+  psychic: "Psíquico",
+  bug: "Bicho",
+  rock: "Roca",
+  ghost: "Fantasma",
+  dragon: "Dragón",
+  dark: "Siniestro",
+  steel: "Acero",
+  fairy: "Hada"
+};
+
 function setStatus(message, state = "") {
   statusMessage.textContent = message;
   statusMessage.className = `status-message ${state}`.trim();
@@ -54,7 +75,7 @@ function renderTypes(types) {
     const typeName = typeEntry.type.name;
     const pill = document.createElement("span");
     pill.className = "type-pill";
-    pill.textContent = typeName;
+    pill.textContent = typeLabels[typeName] || typeName;
     pill.style.background = typeColors[typeName] || "#6B7280";
     pokemonTypes.appendChild(pill);
   });
